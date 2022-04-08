@@ -5,6 +5,3 @@
 
   vars:
     preburn: true
-
-  roles:
-    - role: agw_docker

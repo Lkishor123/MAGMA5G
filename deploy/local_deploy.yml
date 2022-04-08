@@ -1,0 +1,7 @@
+---
+- name: "Local deploy"
+  hosts: localhost
+  connection: local 
+
+  roles:
+    - role: agw_docker

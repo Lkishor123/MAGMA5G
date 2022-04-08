@@ -1,0 +1,46 @@
+# Copy the configfiles
+- name: copy config files in /etc/magma
+  become: true
+  copy:
+    src={{ item.src }}
+    dest={{ item.dest }}
+    mode=u=rw,g=wr,o=wr
+  with_items:
+    - { src: '../files/pipelined.yml', dest: '/etc/magma' }
+    - { src: '../files/gateway.mconfig', dest: '/etc/magma' }
+
+- name: Stop all magma services.
+  become: true
+  shell: service magma@* stop
+  ignore_errors: true
+
+- name: Stop all magma services.
+  become: true
+  shell: service magma@magmad start
+  ignore_errors: true
+
+- name: Add Subscriber
+  become: true
+  shell: subscriber_cli.py  add --lte-auth-key 465B5CE8B199B49FAA5F0A2EE238A6BC --lte-auth-opc E8ED289DEBA952E4283B54E88E6183CA IMSI724990000000008
+  ignore_errors: true
+
+- name: Add dnn
+  become: true
+  shell: subscriber_cli.py update --lte-auth-key 465B5CE8B199B49FAA5F0A2EE238A6BC --lte-auth-opc E8ED289DEBA952E4283B54E88E6183CA --apn-config internet,5,15,1,1,1000,2000,1,,,,  IMSI724990000000008
+  ignore_errors: true
+
+
+- name: Change to focal-ci
+  become: true
+  shell:  sed -i 's+deb https://artifactory.magmacore.org/artifactory/debian focal-1.7.0 main+deb https://artifactory.magmacore.org/artifactory/debian-test focal-ci main+' /etc/apt/sources.list.d/magma.list
+  ignore_errors: true
+
+- name: Update
+  become: true
+  shell: apt update
+  ignore_errors: true
+
+- name: Update
+  become: true
+  shell: apt install magma -y
+  ignore_errors: true
